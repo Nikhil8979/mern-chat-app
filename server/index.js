@@ -3,6 +3,8 @@ const app = express();
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
+const { harperSaveMessage } = require("./services/harper-save-message");
+require("dotenv").config();
 app.use(cors());
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -36,6 +38,12 @@ io.on("connection", (socket) => {
       username: CHAT_BOT,
       __createdtime__,
     });
+  });
+
+  socket.on("send_message", (data) => {
+    const { message, username, room, __createdtime__ } = data;
+    io.in(room).emit("recieved_message", data);
+    harperSaveMessage(message, user, room, __createdtime__);
   });
 });
 
